@@ -1,17 +1,14 @@
-// BirdStreamProcessor.java - Real-time anomaly detection and alerting
+// Simplified BirdStreamProcessor.java - Remove complex windowing for now
 package main.java.com.yvonne.birdstream.processor;
-//package com.yvonne.birdstream.processor;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.*;
-import org.apache.kafka.streams.state.Stores;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -51,22 +48,8 @@ public class BirdStreamProcessor {
             .filter((key, value) -> detectAnomaly(value))
             .mapValues(BirdStreamProcessor::createAlert);
         
-        // Advanced analytics on 5-minute windows
-        KStream<String, String> windowedAlerts = observations
-            .groupByKey()
-            .windowedBy(TimeWindows.of(Duration.ofMinutes(5)))
-            .aggregate(
-                () -> new WindowedSpeciesData(),
-                (key, value, aggregate) -> aggregate.add(parseObservation(value)),
-                Materialized.with(Serdes.String(), new WindowedSpeciesDataSerde())
-            )
-            .toStream()
-            .filter((windowedKey, aggregate) -> aggregate.isAnomalous())
-            .mapValues(aggregate -> createWindowedAlert(windowedKey.key(), aggregate));
-        
         // Send alerts to output topic
         alerts.to(ALERTS_TOPIC);
-        windowedAlerts.to(ALERTS_TOPIC);
         
         // Print alerts to console for demo
         alerts.foreach((key, alert) -> 
@@ -179,40 +162,6 @@ public class BirdStreamProcessor {
             return "{}";
         }
     }
-    
-    private static ObservationData parseObservation(String json) {
-        try {
-            JsonNode node = mapper.readTree(json);
-            return new ObservationData(
-                node.get("commonName").asText(),
-                node.get("county").asText(),
-                node.get("count").asInt(),
-                node.get("timestamp").asLong()
-            );
-        } catch (Exception e) {
-            return null;
-        }
-    }
-    
-    private static String createWindowedAlert(String key, WindowedSpeciesData data) {
-        try {
-            Map<String, Object> alert = new HashMap<>();
-            alert.put("alertType", "WINDOWED_ANOMALY");
-            alert.put("key", key);
-            alert.put("windowTotalCount", data.getTotalCount());
-            alert.put("windowObservationCount", data.getObservationCount());
-            alert.put("averageCountPerObservation", data.getAverageCount());
-            alert.put("timestamp", System.currentTimeMillis());
-            alert.put("message", String.format(
-                "Unusual activity in 5-min window for %s: %d observations, %d total birds",
-                key, data.getObservationCount(), data.getTotalCount()
-            ));
-            
-            return mapper.writeValueAsString(alert);
-        } catch (Exception e) {
-            return "{}";
-        }
-    }
 }
 
 // Supporting classes
@@ -248,57 +197,4 @@ class SpeciesBaseline {
     
     public double getMean() { return mean; }
     public double getStdDev() { return stdDev; }
-}
-
-class ObservationData {
-    private String species;
-    private String county;
-    private int count;
-    private long timestamp;
-    
-    public ObservationData(String species, String county, int count, long timestamp) {
-        this.species = species;
-        this.county = county;
-        this.count = count;
-        this.timestamp = timestamp;
-    }
-    
-    // Getters
-    public String getSpecies() { return species; }
-    public String getCounty() { return county; }
-    public int getCount() { return count; }
-    public long getTimestamp() { return timestamp; }
-}
-
-class WindowedSpeciesData {
-    private int totalCount = 0;
-    private int observationCount = 0;
-    private List<Integer> counts = new ArrayList<>();
-    
-    public WindowedSpeciesData add(ObservationData obs) {
-        if (obs != null) {
-            totalCount += obs.getCount();
-            observationCount++;
-            counts.add(obs.getCount());
-        }
-        return this;
-    }
-    
-    public boolean isAnomalous() {
-        // Alert if we see unusually high activity in a 5-minute window
-        return observationCount > 10 || // More than 10 observations in 5 minutes
-               totalCount > 100 ||      // More than 100 total birds
-               (observationCount > 0 && getAverageCount() > 20); // Very high per-observation count
-    }
-    
-    public int getTotalCount() { return totalCount; }
-    public int getObservationCount() { return observationCount; }
-    public double getAverageCount() { 
-        return observationCount > 0 ? (double) totalCount / observationCount : 0; 
-    }
-}
-
-// Custom Serde for WindowedSpeciesData (simplified)
-class WindowedSpeciesDataSerde extends org.apache.kafka.common.serialization.Serde<WindowedSpeciesData> {
-    // Implementation would go here - simplified for this example
 }

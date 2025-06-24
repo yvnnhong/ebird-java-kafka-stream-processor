@@ -1,0 +1,70 @@
+# Maven build output
+target/
+dependency-reduced-pom.xml
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Java compiled files
+*.class
+*.jar
+*.war
+*.ear
+
+# Log files
+*.log
+logs/
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Data files (keep large datasets local)
+data/raw/*.txt
+data/raw/*.csv
+data/raw/*.gz
+data/processed/*.txt
+data/processed/*.csv
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+*~
+
+# Environment files
+.env
+.env.local
+
+# Package files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Kafka/Docker volumes (if using local volumes)
+kafka-data/
+zookeeper-data/
+
+# Application specific
+application-local.properties
+*.pid
+
+# Generated documentation
+docs/generated/
+
+# Test output
+test-output/
