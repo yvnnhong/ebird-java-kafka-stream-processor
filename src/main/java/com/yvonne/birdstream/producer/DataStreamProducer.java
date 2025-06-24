@@ -1,5 +1,5 @@
 // DataStreamProducer.java - Hybrid historical replay + synthetic data generator
-package main.java.producer;
+package main.java.com.yvonne.birdstream.producer;
 
 import com.opencsv.CSVReader;
 import org.apache.kafka.clients.producer.KafkaProducer;
