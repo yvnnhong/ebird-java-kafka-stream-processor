@@ -1,5 +1,5 @@
 // Simplified BirdStreamProcessor.java - Remove complex windowing for now
-package main.java.com.yvonne.birdstream.processor;
+package com.yvonne.birdstream.processor;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;

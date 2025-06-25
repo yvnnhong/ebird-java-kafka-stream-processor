@@ -1,4 +1,4 @@
-package main.java.com.yvonne.birdstream.alerts;
+package com.yvonne.birdstream.alerts;
 public class AlertDetector {
     
 }
