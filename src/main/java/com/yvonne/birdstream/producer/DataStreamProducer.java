@@ -14,6 +14,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import com.yvonne.birdstream.model.BirdObservation; 
+import com.yvonne.birdstream.model.LocationData;
+
 
 public class DataStreamProducer {
     
@@ -150,9 +153,9 @@ public class DataStreamProducer {
             species,
             count,
             now,
-            location.latitude,
-            location.longitude,
-            location.county,
+            location.getLatitude(),
+            location.getLongitude(),
+            location.getCounty(),
             "SYNTHETIC_OBSERVER_" + ThreadLocalRandom.current().nextInt(100)
         );
     }
@@ -225,52 +228,5 @@ public class DataStreamProducer {
         } catch (NumberFormatException e) {
             return 1;
         }
-    }
-}
-
-// Supporting classes
-class BirdObservation {
-    private String id;
-    private String commonName;
-    private int count;
-    private LocalDateTime observationDate;
-    private double latitude;
-    private double longitude;
-    private String county;
-    private String observerId;
-    
-    public BirdObservation(String id, String commonName, int count, 
-                          LocalDateTime observationDate, double latitude, 
-                          double longitude, String county, String observerId) {
-        this.id = id;
-        this.commonName = commonName;
-        this.count = count;
-        this.observationDate = observationDate;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.county = county;
-        this.observerId = observerId;
-    }
-    
-    // Getters
-    public String getId() { return id; }
-    public String getCommonName() { return commonName; }
-    public int getCount() { return count; }
-    public LocalDateTime getObservationDate() { return observationDate; }
-    public double getLatitude() { return latitude; }
-    public double getLongitude() { return longitude; }
-    public String getCounty() { return county; }
-    public String getObserverId() { return observerId; }
-}
-
-class LocationData {
-    final double latitude;
-    final double longitude;
-    final String county;
-    
-    public LocationData(double latitude, double longitude, String county) {
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.county = county;
     }
 }

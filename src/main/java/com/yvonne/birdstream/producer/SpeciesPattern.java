@@ -1,6 +1,8 @@
 package com.yvonne.birdstream.producer;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import com.yvonne.birdstream.model.LocationData;
+import com.yvonne.birdstream.model.BirdObservation; 
 
 public class SpeciesPattern {
     private Map<Integer, Double> monthlyProbabilities = new HashMap<>();
