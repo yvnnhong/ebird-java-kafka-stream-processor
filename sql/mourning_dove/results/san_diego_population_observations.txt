@@ -1,0 +1,70 @@
+# Mourning Dove Population Analysis Results: San Diego County (2005-2024)
+## eBird Data Analysis - Local Focus for UCSD Streaming Project
+
+# Mourning Dove Population Analysis Results: San Diego County (2005-2024)
+## eBird Data Analysis - Local Focus for UCSD Streaming Project
+
+### Query Execution Results:
+```
+┌───────┬──────────────────┬─────────────────┬──────────────────────┬──────────────────────┬─────────────────┬──────────────────────┐
+│ year  │ birds_counted_sd │ observations_sd │ total_birds_statew.  │ percent_of_state_t.  │ prev_year_birds │ percent_change_fro.  │
+│ int64 │      int128      │      int64      │        int128        │        double        │     int128      │        double        │
+├───────┼──────────────────┼─────────────────┼──────────────────────┼──────────────────────┼─────────────────┼──────────────────────┤
+│  2005 │             2345 │             484 │                40866 │                  5.7 │            NULL │                 NULL │
+│  2006 │             3299 │             701 │                52344 │                  6.3 │            2345 │                 40.7 │
+│  2007 │             4579 │             959 │                78557 │                  5.8 │            3299 │                 38.8 │
+│  2008 │             7797 │            1431 │                88904 │                  8.8 │            4579 │                 70.3 │
+│  2009 │             9723 │            1861 │               117967 │                  8.2 │            7797 │                 24.7 │
+│  2010 │            12585 │            2450 │               182935 │                  6.9 │            9723 │                 29.4 │
+│  2011 │            13266 │            2880 │               203031 │                  6.5 │           12585 │                  5.4 │
+│  2012 │            16554 │            3615 │               231826 │                  7.1 │           13266 │                 24.8 │
+│  2013 │            19796 │            4799 │               265331 │                  7.5 │           16554 │                 19.6 │
+│  2014 │            30668 │            6947 │               360484 │                  8.5 │           19796 │                 54.9 │
+│  2015 │            41104 │            7966 │               498736 │                  8.2 │           30668 │                 34.0 │
+│  2016 │            60324 │           10350 │               585917 │                 10.3 │           41104 │                 46.8 │
+│  2017 │            88534 │           13048 │               661766 │                 13.4 │           60324 │                 46.8 │
+│  2018 │            96460 │           16520 │               710032 │                 13.6 │           88534 │                  9.0 │
+│  2019 │           105462 │           18619 │               771758 │                 13.7 │           96460 │                  9.3 │
+│  2020 │           145591 │           25367 │              1004983 │                 14.5 │          105462 │                 38.1 │
+│  2021 │           157672 │           30266 │              1021472 │                 15.4 │          145591 │                  8.3 │
+│  2022 │           153099 │           32025 │              1057205 │                 14.5 │          157672 │                 -2.9 │
+│  2023 │           164134 │           34293 │              1150958 │                 14.3 │          153099 │                  7.2 │
+│  2024 │           174422 │           34963 │              1198934 │                 14.5 │          164134 │                  6.3 │
+├───────┴──────────────────┴─────────────────┴──────────────────────┴──────────────────────┴─────────────────┴──────────────────────┤
+│ 20 rows                                                                                                                 7 columns │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Analysis Summary:
+
+**San Diego County Population Stability Assessment:**
+
+**Key Findings for Streaming Pipeline:**
+
+1. **Consistent Growth Pattern**: 
+   - San Diego shows steady increase from 2,345 birds (2005) to 174,422 birds (2024)
+   - Growth reflects increased eBird participation rather than population explosion
+   - Predictable trajectory suitable for baseline modeling
+
+2. **Regional Significance**:
+   - San Diego's contribution to state total grew from 5.7% to 14.5%
+   - Demonstrates increasing importance as observation hotspot
+   - Local relevance for UCSD-based streaming project
+
+3. **Data Volume Characteristics**:
+   - Observation counts increase from 484 to 34,963 over 20 years
+   - High-frequency data suitable for real-time streaming simulation
+   - Sufficient volume for synthetic data generation algorithms
+
+4. **Population Stability Indicators**:
+   - Year-over-year changes show manageable growth patterns
+   - Only one negative growth year (2022: -2.9%)
+   - Recent stabilization around 14-15% of state total
+
+**Validation Metrics for Synthetic Data Generation:**
+
+- **Geographic Focus**: San Diego County provides manageable, locally-relevant dataset
+- **Temporal Consistency**: 20 years of continuous data for pattern learning  
+- **Data Volume**: High observation counts for robust statistical modeling
+- **Growth Predictability**: Consistent trends suitable for synthetic replication
+- **Local Relevance**: UCSD location alignment for field validation opportunities
