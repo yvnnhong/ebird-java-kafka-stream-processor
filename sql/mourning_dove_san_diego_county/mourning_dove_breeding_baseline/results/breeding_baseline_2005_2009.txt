@@ -1,0 +1,20 @@
+-- QUERY RESULTS:
+-- Runtime: 100% complete
+-- Total rows returned: 2
+
+┌───────┬─────────┬───────────────┬──────────────┬──────────────────────┬───────┐
+│ year  │ season  │ breeding_code │ observations │ percentage_of_season │ rank  │
+│ int64 │ varchar │    varchar    │    int64     │        double        │ int64 │
+├───────┼─────────┼───────────────┼──────────────┼──────────────────────┼───────┤
+│  2009 │ Spring  │ C             │            1 │                100.0 │     1 │
+│  2009 │ Summer  │ ON            │            1 │                100.0 │     1 │
+└───────┴─────────┴───────────────┴──────────────┴──────────────────────┴───────┘
+
+-- ANALYSIS SUMMARY:
+-- • Years 2005-2008: Zero breeding code observations
+-- • Year 2009: Only 2 total observations
+--   - Spring: 1 Courtship (C) observation
+--   - Summer: 1 Occupied Nest (ON) observation
+-- • Historical significance: Shows early eBird adoption period
+-- • Note: Insufficient data for statistical baselines
+-- • Use: Historical completeness and eBird evolution documentation
