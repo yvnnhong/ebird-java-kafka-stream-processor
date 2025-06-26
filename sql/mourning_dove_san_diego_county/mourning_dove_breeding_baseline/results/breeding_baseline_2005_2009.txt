@@ -1,4 +1,4 @@
--- QUERY RESULTS:
+-- QUERY RESULTS FOR 2005-2009:
 -- Runtime: 100% complete
 -- Total rows returned: 2
 
@@ -15,6 +15,7 @@
 -- • Year 2009: Only 2 total observations
 --   - Spring: 1 Courtship (C) observation
 --   - Summer: 1 Occupied Nest (ON) observation
--- • Historical significance: Shows early eBird adoption period
+-- • Historical significance: Shows early eBird adoption period 
+     (eBird was created recently, so not much user traction yet)
 -- • Note: Insufficient data for statistical baselines
 -- • Use: Historical completeness and eBird evolution documentation
