@@ -172,7 +172,7 @@ public class DataStreamProducer {
     }
     
     private void updateSpeciesPattern(BirdObservation obs) {
-        speciesPatterns.computeIfAbsent(obs.getCommonName(), k -> new SpeciesPattern())
+        speciesPatterns.computeIfAbsent(obs.getCommonName(), _ -> new SpeciesPattern())
                      .addObservation(obs);
     }
     

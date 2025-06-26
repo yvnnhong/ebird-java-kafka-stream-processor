@@ -35,24 +35,24 @@ public class BirdStreamProcessor {
         
         // Split historical vs synthetic data
         Map<String, KStream<String, String>> branches = observations.split()
-            .branch((key, value) -> isHistoricalData(value), Branched.as("historical"))
-            .branch((key, value) -> isSyntheticData(value), Branched.as("synthetic"))
+            .branch((_, value) -> isHistoricalData(value), Branched.as("historical"))
+            .branch((_, value) -> isSyntheticData(value), Branched.as("synthetic"))
             .defaultBranch(Branched.as("other"));
         
         // Process historical data to build baselines
         branches.get("historical")
-            .foreach((key, value) -> updateBaseline(value));
+            .foreach((_, value) -> updateBaseline(value));
         
         // Analyze synthetic data for anomalies
         KStream<String, String> alerts = branches.get("synthetic")
-            .filter((key, value) -> detectAnomaly(value))
+            .filter((_, value) -> detectAnomaly(value))
             .mapValues(BirdStreamProcessor::createAlert);
         
         // Send alerts to output topic
         alerts.to(ALERTS_TOPIC);
         
         // Print alerts to console for demo
-        alerts.foreach((key, alert) -> 
+        alerts.foreach((_, alert) -> 
             System.out.println("🚨 ALERT: " + alert));
         
         KafkaStreams streams = new KafkaStreams(builder.build(), props);
@@ -90,7 +90,7 @@ public class BirdStreamProcessor {
             int count = obs.get("count").asInt();
             
             String key = species + "_" + county;
-            baselines.computeIfAbsent(key, k -> new SpeciesBaseline())
+            baselines.computeIfAbsent(key, _ -> new SpeciesBaseline())
                      .addHistoricalObservation(count);
                      
         } catch (Exception e) {
