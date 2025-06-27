@@ -1,3 +1,4 @@
+-- total_annual_populations.sql
 -- Mourning Dove Population Analysis: San Diego County (2005-2024)
 --
 -- Analyzes yearly bird counts and observation patterns in San Diego County
