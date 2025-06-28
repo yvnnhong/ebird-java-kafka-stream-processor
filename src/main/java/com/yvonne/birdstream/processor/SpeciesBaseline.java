@@ -1,5 +1,4 @@
 package com.yvonne.birdstream.processor;
-// can use java.util.*; instead (wild card import)
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,10 +7,11 @@ public class SpeciesBaseline {
     private double mean = 0.0;
     private double stdDev = 1.0;
     private boolean calculated = false;
+    private boolean baselineLogged = false; // Prevent spam logging
     
     public void addHistoricalObservation(int count) {
         historicalCounts.add(count);
-        if (historicalCounts.size() % 100 == 0) { // Recalculate every 100 observations
+        if (historicalCounts.size() % 10 == 0) { // Recalculate every 10 observations
             calculateStats();
         }
     }
@@ -30,7 +30,15 @@ public class SpeciesBaseline {
     }
     
     public boolean hasEnoughData() {
-        return calculated && historicalCounts.size() >= 50;
+        return calculated && historicalCounts.size() >= 20; // Reduced threshold for faster testing
+    }
+    
+    public boolean shouldLogBaseline() {
+        if (hasEnoughData() && !baselineLogged) {
+            baselineLogged = true;
+            return true;
+        }
+        return false;
     }
     
     public double getMean() { 
@@ -39,5 +47,9 @@ public class SpeciesBaseline {
     
     public double getStdDev() { 
         return stdDev; 
+    }
+    
+    public int getObservationCount() {
+        return historicalCounts.size();
     }
 }

@@ -14,7 +14,7 @@ import java.io.FileReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-//import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import com.yvonne.birdstream.model.BirdObservation; 
@@ -268,7 +268,17 @@ public class DataStreamProducer {
             String commonName = node.get("commonName").asText();
             int count = node.get("count").asInt();
             String dateStr = node.get("observationDate").asText();
-            LocalDateTime observationDate = LocalDateTime.parse(dateStr + "T08:00:00");
+            
+            // Fix date parsing - handle both formats
+            LocalDateTime observationDate;
+            if (dateStr.contains("T")) {
+                // Already has time component
+                observationDate = LocalDateTime.parse(dateStr);
+            } else {
+                // Just date, add time
+                observationDate = LocalDateTime.parse(dateStr + "T08:00:00");
+            }
+            
             double latitude = node.get("latitude").asDouble();
             double longitude = node.get("longitude").asDouble();
             String county = node.get("county").asText();
@@ -281,6 +291,7 @@ public class DataStreamProducer {
             
         } catch (Exception e) {
             System.err.println("Error converting JSON to BirdObservation: " + e.getMessage());
+            System.err.println("Problematic date string: " + node.get("observationDate").asText());
             return null;
         }
     }

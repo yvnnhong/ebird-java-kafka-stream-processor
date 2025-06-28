@@ -1,4 +1,4 @@
-// Simplified BirdStreamProcessor.java - Remove complex windowing for now
+// Fixed BirdStreamProcessor.java - Remove complex branching for now
 package com.yvonne.birdstream.processor;
 
 import org.apache.kafka.common.serialization.Serdes;
@@ -30,30 +30,38 @@ public class BirdStreamProcessor {
         
         StreamsBuilder builder = new StreamsBuilder();
         
-        // Main processing pipeline
+        // Main processing pipeline - simplified approach
         KStream<String, String> observations = builder.stream(INPUT_TOPIC);
         
-        // Split historical vs synthetic data
-        Map<String, KStream<String, String>> branches = observations.split()
-            .branch((_, value) -> isHistoricalData(value), Branched.as("historical"))
-            .branch((_, value) -> isSyntheticData(value), Branched.as("synthetic"))
-            .defaultBranch(Branched.as("other"));
+        System.out.println("🚀 Bird Stream Processor starting...");
+        System.out.println("   📥 Listening for observations on: " + INPUT_TOPIC);
+        System.out.println("   📤 Sending alerts to: " + ALERTS_TOPIC);
         
-        // Process historical data to build baselines
-        branches.get("historical")
-            .foreach((_, value) -> updateBaseline(value));
-        
-        // Analyze synthetic data for anomalies
-        KStream<String, String> alerts = branches.get("synthetic")
-            .filter((_, value) -> detectAnomaly(value))
-            .mapValues(BirdStreamProcessor::createAlert);
+        // Process all observations and split logic internally
+        KStream<String, String> alerts = observations
+            .filter((key, value) -> value != null && !value.trim().isEmpty())
+            .mapValues(BirdStreamProcessor::processObservation)
+            .filter((key, value) -> value != null); // Only keep alerts
         
         // Send alerts to output topic
         alerts.to(ALERTS_TOPIC);
         
         // Print alerts to console for demo
-        alerts.foreach((_, alert) -> 
+        alerts.foreach((key, alert) -> 
             System.out.println("🚨 ALERT: " + alert));
+        
+        // Print all observations for debugging
+        observations.foreach((key, value) -> {
+            try {
+                JsonNode obs = mapper.readTree(value);
+                String dataType = obs.get("dataType").asText();
+                String species = obs.get("commonName").asText();
+                int count = obs.get("count").asInt();
+                System.out.println("📊 Received " + dataType + ": " + species + " count=" + count);
+            } catch (Exception e) {
+                System.out.println("📥 Received observation: " + value.substring(0, Math.min(100, value.length())) + "...");
+            }
+        });
         
         KafkaStreams streams = new KafkaStreams(builder.build(), props);
         
@@ -61,24 +69,30 @@ public class BirdStreamProcessor {
         Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
         
         streams.start();
-        System.out.println("Bird Stream Processor started...");
+        System.out.println("✅ Bird Stream Processor started and waiting for data...");
     }
     
-    private static boolean isHistoricalData(String value) {
+    private static String processObservation(String observationJson) {
         try {
-            JsonNode node = mapper.readTree(value);
-            return "HISTORICAL".equals(node.get("dataType").asText());
+            JsonNode obs = mapper.readTree(observationJson);
+            String dataType = obs.get("dataType").asText();
+            
+            if ("HISTORICAL".equals(dataType)) {
+                // Build baseline from historical data
+                updateBaseline(observationJson);
+                return null; // No alert for historical data
+            } else if ("SYNTHETIC".equals(dataType)) {
+                // Check for anomalies in synthetic data
+                if (detectAnomaly(observationJson)) {
+                    return createAlert(observationJson);
+                }
+            }
+            
+            return null; // No alert
+            
         } catch (Exception e) {
-            return false;
-        }
-    }
-    
-    private static boolean isSyntheticData(String value) {
-        try {
-            JsonNode node = mapper.readTree(value);
-            return "SYNTHETIC".equals(node.get("dataType").asText());
-        } catch (Exception e) {
-            return false;
+            System.err.println("Error processing observation: " + e.getMessage());
+            return null;
         }
     }
     
@@ -92,6 +106,14 @@ public class BirdStreamProcessor {
             String key = species + "_" + county;
             baselines.computeIfAbsent(key, _ -> new SpeciesBaseline())
                      .addHistoricalObservation(count);
+                     
+            // Log baseline building progress (only once per baseline)
+            SpeciesBaseline baseline = baselines.get(key);
+            if (baseline.shouldLogBaseline()) {
+                System.out.println("📈 Baseline established for " + key + 
+                                 " (mean=" + String.format("%.1f", baseline.getMean()) + 
+                                 ", observations=" + baseline.getObservationCount() + ")");
+            }
                      
         } catch (Exception e) {
             e.printStackTrace();
@@ -116,8 +138,9 @@ public class BirdStreamProcessor {
             double zscore = Math.abs(count - baseline.getMean()) / baseline.getStdDev();
             
             if (zscore > 3.0) {
-                System.out.println("Anomaly detected: " + species + " in " + county + 
-                                 " - Count: " + count + ", Z-score: " + String.format("%.2f", zscore));
+                System.out.println("🔍 Anomaly detected: " + species + " in " + county + 
+                                 " - Count: " + count + ", Z-score: " + String.format("%.2f", zscore) +
+                                 " (expected ~" + String.format("%.1f", baseline.getMean()) + ")");
                 return true;
             }
             

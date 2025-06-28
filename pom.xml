@@ -33,10 +33,22 @@
             <version>${kafka.version}</version>
         </dependency>
         
-        <!-- Jackson for JSON processing -->
+        <!-- Jackson for JSON processing - ALL THREE NEEDED -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
             <version>${jackson.version}</version>
         </dependency>
         
@@ -47,7 +59,13 @@
             <version>5.8</version>
         </dependency>
         
-        <!-- SLF4J for logging -->
+        <!-- SLF4J for logging - BOTH API AND IMPLEMENTATION -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.7</version>
+        </dependency>
+        
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
@@ -76,6 +94,28 @@
                 </configuration>
             </plugin>
             
+            <!-- Maven Dependency Plugin - CRITICAL FOR CLASSPATH -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/dependency</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            
             <!-- Maven Exec Plugin for running applications -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -84,6 +124,29 @@
                 <configuration>
                     <mainClass>com.yvonne.birdstream.producer.DataStreamProducer</mainClass>
                 </configuration>
+            </plugin>
+            
+            <!-- Maven Shade Plugin - Creates fat JAR (alternative approach) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.yvonne.birdstream.processor.BirdStreamProcessor</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
