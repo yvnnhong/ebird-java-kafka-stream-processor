@@ -1,0 +1,39 @@
+# Mourning Dove Anomaly Detection Pipeline - Performance Report
+============================================================
+
+Generated: 2025-06-28 15:34:26
+
+## Dataset Summary
+Total synthetic observations: 1000
+True anomalies (ground truth): 32
+Normal observations: 968
+Anomaly rate: 3.2%
+
+## Detection Performance
+True Positives: 31
+False Positives: 0
+True Negatives: 968
+False Negatives: 1
+Precision: 1.000
+Recall: 0.969
+F1-Score: 0.984
+
+## Statistical Analysis
+Normal observations - Mean: 5.94, Std: 2.00
+Anomalous observations - Mean: 82.69, Std: 40.76
+Detection multiplier range: 2.0x - 35.2x
+
+## Technical Implementation
+- Data Source: 20-year eBird historical data (2005-2024)
+- Prediction Model: Polynomial regression (R² = 0.969)
+- Synthetic Data: 2025 population predictions with seasonal patterns
+- Detection Method: Z-score analysis (threshold > 3.0)
+- Stream Processing: Apache Kafka with real-time processing
+- Geographic Scope: San Diego County, California
+- Target Species: Mourning Dove (Zenaida macroura)
+
+## Conclusion
+The regression-based synthetic data generation combined with Z-score anomaly detection
+demonstrates effective real-time monitoring capabilities for ecological data streams.
+The system achieved 100.0% precision and 96.9% recall in detecting
+unusual bird population observations, suitable for production wildlife monitoring systems.
