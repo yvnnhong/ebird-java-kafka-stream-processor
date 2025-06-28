@@ -43,7 +43,7 @@ class MourningDovePopulationPredictor:
     def plot_population_trends(self):
         """Create comprehensive population trend visualizations"""
         
-        print("📊 Skipping plot generation for now (matplotlib backend issue)")
+        print("Skipping plot generation for now (matplotlib backend issue)")
         print("   Population trends analysis:")
         print(f"   2005: {self.pop_df['birds_counted_sd'].iloc[0]:,} birds")
         print(f"   2024: {self.pop_df['birds_counted_sd'].iloc[-1]:,} birds") 
@@ -77,7 +77,7 @@ class MourningDovePopulationPredictor:
         self.models['observations'] = obs_model
         
         # Calculate R² scores for model evaluation
-        print("🔍 Model Performance (R² scores):")
+        print("Model Performance (R² scores):")
         for name, model in self.models.items():
             if 'birds' in name:
                 y_pred = model.predict(X)
@@ -108,7 +108,7 @@ class MourningDovePopulationPredictor:
             'birds_per_observation': future_birds / future_observations
         })
         
-        print(f"\n🔮 Population Predictions ({2025}-{2024 + years_ahead}):")
+        print(f"\nPopulation Predictions ({2025}-{2024 + years_ahead}):")
         print(predictions_df.to_string(index=False))
         
         self.predictions = predictions_df
@@ -118,10 +118,10 @@ class MourningDovePopulationPredictor:
         """Analyze breeding code patterns from your CSV data"""
         
         if self.breeding_df is None:
-            print("⚠️  No breeding data CSV found, using default patterns")
+            print("No breeding data CSV found, using default patterns")
             return self.get_default_breeding_patterns()
         
-        print("\n🐣 Analyzing Breeding Code Patterns:")
+        print("\nAnalyzing Breeding Code Patterns:")
         
         # Seasonal breeding patterns
         seasonal_breeding = self.breeding_df.groupby(['season', 'breeding_code'])['observations'].sum().reset_index()
@@ -159,7 +159,7 @@ class MourningDovePopulationPredictor:
         """Generate synthetic observations based on regression predictions and breeding patterns"""
         
         if target_year not in self.predictions['year'].values:
-            print(f"⚠️  Year {target_year} not in predictions, using 2025")
+            print(f"Year {target_year} not in predictions, using 2025")
             target_year = 2025
         
         # Get predicted values for target year
@@ -168,10 +168,10 @@ class MourningDovePopulationPredictor:
         predicted_obs_count = year_pred['predicted_observations']
         avg_birds_per_obs = year_pred['birds_per_observation']
         
-        print(f"\n🤖 Generating {num_observations} synthetic observations for {target_year}")
-        print(f"   Predicted total birds: {predicted_birds:,}")
-        print(f"   Predicted observations: {predicted_obs_count:,}")
-        print(f"   Average birds per observation: {avg_birds_per_obs:.1f}")
+        print(f"\nGenerating {num_observations} synthetic observations for {target_year}")
+        print(f"Predicted total birds: {predicted_birds:,}")
+        print(f"Predicted observations: {predicted_obs_count:,}")
+        print(f"Average birds per observation: {avg_birds_per_obs:.1f}")
         
         # Get breeding patterns
         breeding_patterns = self.analyze_breeding_patterns()
@@ -243,7 +243,7 @@ class MourningDovePopulationPredictor:
             synthetic_observations.append(synthetic_obs)
             
             if is_anomaly:
-                print(f"  🚨 Anomaly generated: {count} birds in {season} (normal: ~{base_count})")
+                print(f"Anomaly generated: {count} birds in {season} (normal: ~{base_count})")
         
         return synthetic_observations
     
@@ -253,13 +253,13 @@ class MourningDovePopulationPredictor:
         # Save predictions
         pred_path = project_root / "data" / "population_predictions.csv"
         self.predictions.to_csv(pred_path, index=False)
-        print(f"📈 Predictions saved to: {pred_path}")
+        print(f"Predictions saved to: {pred_path}")
         
         # Save synthetic data
         synth_path = project_root / "data" / "synthetic_observations_regression.json"
         with open(synth_path, 'w') as f:
             json.dump(synthetic_data, f, indent=2)
-        print(f"🤖 Synthetic data saved to: {synth_path}")
+        print(f"Synthetic data saved to: {synth_path}")
         
         # Save summary statistics
         summary = {
@@ -275,43 +275,43 @@ class MourningDovePopulationPredictor:
         summary_path = project_root / "data" / "synthetic_generation_summary.json"
         with open(summary_path, 'w') as f:
             json.dump(summary, f, indent=2)
-        print(f"📋 Summary saved to: {summary_path}")
+        print(f"Summary saved to: {summary_path}")
 
 # Run the complete analysis
 if __name__ == "__main__":
-    print("🐦 Mourning Dove Population Analysis & Synthetic Data Generation")
+    print("Mourning Dove Population Analysis & Synthetic Data Generation")
     print("=" * 60)
     
     predictor = MourningDovePopulationPredictor()
     
     # 1. Plot population trends
-    print("\n1️⃣ Plotting population trends...")
+    print("\nPlotting population trends...")
     predictor.plot_population_trends()
     
     # 2. Fit regression models
-    print("\n2️⃣ Fitting regression models...")
+    print("\nFitting regression models...")
     predictor.fit_regression_models()
     
     # 3. Predict future populations
-    print("\n3️⃣ Predicting future populations...")
+    print("\nPredicting future populations...")
     predictor.predict_future_populations(years_ahead=3)
     
     # 4. Generate synthetic data
-    print("\n4️⃣ Generating synthetic observations...")
+    print("\nGenerating synthetic observations...")
     synthetic_data = predictor.generate_synthetic_observations(target_year=2025, num_observations=1000)
     
     # 5. Save everything
-    print("\n5️⃣ Saving results...")
+    print("\nSaving results...")
     predictor.save_results(synthetic_data)
     
-    print(f"\n✅ Complete! Generated {len(synthetic_data)} synthetic observations")
-    print(f"   Anomalies: {sum(1 for obs in synthetic_data if obs['isAnomaly'])}")
-    print(f"   Ready for Kafka streaming!")
+    print(f"Complete! Generated {len(synthetic_data)} synthetic observations")
+    print(f"Anomalies: {sum(1 for obs in synthetic_data if obs['isAnomaly'])}")
+    print(f"Ready for Kafka streaming!")
     
     # Print next steps
-    print("\n🚀 Next Steps:")
+    print("\nNext Steps:")
     print("1. Start Kafka: docker-compose up -d")
     print("2. Create topics: ./scripts/create-topics.sh")
     print("3. Run Java DataStreamProducer")
     print("4. Run Java BirdStreamProcessor")
-    print("5. Watch for anomaly alerts! 🚨")
+    print("5. Watch for anomaly alerts!")

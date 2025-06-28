@@ -33,9 +33,9 @@ public class BirdStreamProcessor {
         // Main processing pipeline - simplified approach
         KStream<String, String> observations = builder.stream(INPUT_TOPIC);
         
-        System.out.println("🚀 Bird Stream Processor starting...");
-        System.out.println("   📥 Listening for observations on: " + INPUT_TOPIC);
-        System.out.println("   📤 Sending alerts to: " + ALERTS_TOPIC);
+        System.out.println("Bird Stream Processor starting...");
+        System.out.println("Listening for observations on: " + INPUT_TOPIC);
+        System.out.println("Sending alerts to: " + ALERTS_TOPIC);
         
         // Process all observations and split logic internally
         KStream<String, String> alerts = observations
@@ -48,7 +48,7 @@ public class BirdStreamProcessor {
         
         // Print alerts to console for demo
         alerts.foreach((key, alert) -> 
-            System.out.println("🚨 ALERT: " + alert));
+            System.out.println("ALERT: " + alert));
         
         // Print all observations for debugging
         observations.foreach((key, value) -> {
@@ -57,9 +57,9 @@ public class BirdStreamProcessor {
                 String dataType = obs.get("dataType").asText();
                 String species = obs.get("commonName").asText();
                 int count = obs.get("count").asInt();
-                System.out.println("📊 Received " + dataType + ": " + species + " count=" + count);
+                System.out.println("Received " + dataType + ": " + species + " count=" + count);
             } catch (Exception e) {
-                System.out.println("📥 Received observation: " + value.substring(0, Math.min(100, value.length())) + "...");
+                System.out.println("Received observation: " + value.substring(0, Math.min(100, value.length())) + "...");
             }
         });
         
@@ -69,7 +69,7 @@ public class BirdStreamProcessor {
         Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
         
         streams.start();
-        System.out.println("✅ Bird Stream Processor started and waiting for data...");
+        System.out.println("Bird Stream Processor started and waiting for data...");
     }
     
     private static String processObservation(String observationJson) {
@@ -110,7 +110,7 @@ public class BirdStreamProcessor {
             // Log baseline building progress (only once per baseline)
             SpeciesBaseline baseline = baselines.get(key);
             if (baseline.shouldLogBaseline()) {
-                System.out.println("📈 Baseline established for " + key + 
+                System.out.println("Baseline established for " + key + 
                                  " (mean=" + String.format("%.1f", baseline.getMean()) + 
                                  ", observations=" + baseline.getObservationCount() + ")");
             }
@@ -138,7 +138,7 @@ public class BirdStreamProcessor {
             double zscore = Math.abs(count - baseline.getMean()) / baseline.getStdDev();
             
             if (zscore > 3.0) {
-                System.out.println("🔍 Anomaly detected: " + species + " in " + county + 
+                System.out.println("Anomaly detected: " + species + " in " + county + 
                                  " - Count: " + count + ", Z-score: " + String.format("%.2f", zscore) +
                                  " (expected ~" + String.format("%.1f", baseline.getMean()) + ")");
                 return true;

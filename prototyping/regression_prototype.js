@@ -2,7 +2,7 @@
 // Initial prototype for regression-based population prediction
 // Used to validate approach before Python + Java implementation
 
-console.log("🧪 Mourning Dove Population Regression Prototype");
+console.log("Mourning Dove Population Regression Prototype");
 console.log("================================================");
 
 // San Diego County historical data (2005-2024)
@@ -41,7 +41,7 @@ function calculateRSquared(x, y, model) {
 }
 
 // Prototype analysis
-console.log("\n📊 Data Summary:");
+console.log("\nData Summary:");
 console.log(`Years: ${populationData.year[0]} - ${populationData.year[populationData.year.length-1]}`);
 console.log(`Population growth: ${populationData.birds_counted_sd[0].toLocaleString()} → ${populationData.birds_counted_sd[populationData.birds_counted_sd.length-1].toLocaleString()}`);
 console.log(`Growth factor: ${(populationData.birds_counted_sd[populationData.birds_counted_sd.length-1] / populationData.birds_counted_sd[0]).toFixed(1)}x`);
@@ -50,7 +50,7 @@ console.log(`Growth factor: ${(populationData.birds_counted_sd[populationData.bi
 const birdsModel = linearRegression(populationData.year, populationData.birds_counted_sd);
 const obsModel = linearRegression(populationData.year, populationData.observations_sd);
 
-console.log("\n🔍 Regression Models:");
+console.log("\nRegression Models:");
 console.log(`Birds: y = ${birdsModel.slope.toFixed(1)}x + ${birdsModel.intercept.toFixed(0)}`);
 console.log(`Observations: y = ${obsModel.slope.toFixed(1)}x + ${obsModel.intercept.toFixed(0)}`);
 
@@ -58,7 +58,7 @@ console.log(`Observations: y = ${obsModel.slope.toFixed(1)}x + ${obsModel.interc
 const birdsR2 = calculateRSquared(populationData.year, populationData.birds_counted_sd, birdsModel);
 const obsR2 = calculateRSquared(populationData.year, populationData.observations_sd, obsModel);
 
-console.log("\n📈 Model Performance:");
+console.log("\nModel Performance:");
 console.log(`Birds R²: ${birdsR2.toFixed(3)} (${birdsR2 > 0.9 ? 'Excellent' : birdsR2 > 0.8 ? 'Good' : 'Fair'} fit)`);
 console.log(`Observations R²: ${obsR2.toFixed(3)} (${obsR2 > 0.9 ? 'Excellent' : obsR2 > 0.8 ? 'Good' : 'Fair'} fit)`);
 
@@ -75,13 +75,13 @@ const predictions = futureYears.map(year => {
     };
 });
 
-console.log("\n🔮 Future Predictions:");
+console.log("\nFuture Predictions:");
 predictions.forEach(pred => {
     console.log(`${pred.year}: ${pred.predicted_birds.toLocaleString()} birds, ${pred.predicted_observations.toLocaleString()} observations (${pred.birds_per_observation} birds/obs)`);
 });
 
 // Year-over-year growth analysis
-console.log("\n📈 Growth Pattern Analysis:");
+console.log("\nGrowth Pattern Analysis:");
 const growthRates = [];
 for (let i = 1; i < populationData.year.length; i++) {
     const rate = ((populationData.birds_counted_sd[i] - populationData.birds_counted_sd[i-1]) / populationData.birds_counted_sd[i-1] * 100);
@@ -95,7 +95,7 @@ const avgGrowthRate = growthRates.reduce((a, b) => a + b, 0) / growthRates.lengt
 console.log(`Average annual growth: ${avgGrowthRate.toFixed(1)}%`);
 
 // Synthetic data generation prototype
-console.log("\n🤖 Synthetic Data Generation Prototype:");
+console.log("\nSynthetic Data Generation Prototype:");
 
 function generateSyntheticObservation(targetYear = 2025) {
     const prediction = predictions.find(p => p.year === targetYear);
@@ -161,8 +161,8 @@ for (let i = 0; i < 5; i++) {
     console.log(`  ${obs.id}: ${obs.count} birds, ${obs.season}, ${obs.breedingCode}${anomalyFlag}`);
 }
 
-console.log("\n✅ Prototype validation complete!");
-console.log("📋 Key findings:");
+console.log("\nPrototype validation complete!");
+console.log(" Key findings:");
 console.log(`   • Linear regression achieves R² = ${birdsR2.toFixed(3)} for population prediction`);
 console.log(`   • 2025 prediction: ${predictions[0].predicted_birds.toLocaleString()} birds (${predictions[0].birds_per_observation} per observation)`);
 console.log(`   • Synthetic data generation feasible with seasonal breeding patterns`);
@@ -191,7 +191,7 @@ const prototypeResults = {
     ]
 };
 
-console.log("\n📦 Prototype results exported for production implementation");
-console.log(`📄 Results object contains ${Object.keys(prototypeResults).length} key components`);
+console.log("\nPrototype results exported for production implementation");
+console.log(`Results object contains ${Object.keys(prototypeResults).length} key components`);
 
 // This prototype validates the approach before building the full Python + Java pipeline

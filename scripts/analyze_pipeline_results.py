@@ -48,7 +48,7 @@ def analyze_detection_performance(synthetic_df):
     recall = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) > 0 else 0
     f1_score = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
     
-    print("\n🎯 Anomaly Detection Performance:")
+    print("\nAnomaly Detection Performance:")
     print(f"True Positives: {true_positives}")
     print(f"False Positives: {false_positives}")
     print(f"True Negatives: {true_negatives}")
@@ -158,7 +158,7 @@ def create_visualizations(df):
     # Save the plot
     output_path = project_root / "data" / "pipeline_analysis_results.png"
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    print(f"\n📊 Visualization saved to: {output_path}")
+    print(f"\nVisualization saved to: {output_path}")
     
     # Don't show plot in non-interactive mode
     # plt.show()  # Commented out to avoid GUI issues
@@ -227,10 +227,10 @@ def generate_summary_report(df):
         f.write(f"The system achieved {precision:.1%} precision and {recall:.1%} recall in detecting\n")
         f.write("unusual bird population observations, suitable for production wildlife monitoring systems.\n")
     
-    print(f"📋 Summary report saved to: {report_path}")
+    print(f"Summary report saved to: {report_path}")
 
 if __name__ == "__main__":
-    print("🔬 Analyzing Pipeline Results...")
+    print("Analyzing Pipeline Results...")
     
     # Load and analyze data
     synthetic_df = load_synthetic_data()
@@ -242,8 +242,8 @@ if __name__ == "__main__":
     # Generate report
     generate_summary_report(final_df)
     
-    print("\n✅ Analysis complete!")
-    print("📁 Output files:")
+    print("\nAnalysis complete!")
+    print("Output files:")
     print("   - pipeline_analysis_results.png (visualizations)")
     print("   - pipeline_performance_report.txt (summary)")
-    print("   - Ready for presentation! 🎯")
+    print("   - Ready for presentation! ")
