@@ -25,7 +25,7 @@ public class SpeciesPattern {
         counts.add(obs.getCount());
         
         // Track seasonal counts for more accurate patterns
-        seasonalCounts.computeIfAbsent(season, k -> new ArrayList<>()).add(obs.getCount());
+        seasonalCounts.computeIfAbsent(season, _ -> new ArrayList<>()).add(obs.getCount());
         
         // Track locations
         locations.add(new LocationData(obs.getLatitude(), obs.getLongitude(), obs.getCounty()));

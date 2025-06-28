@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.FileReader;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+//import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import com.yvonne.birdstream.model.BirdObservation; 
@@ -66,7 +66,7 @@ public class DataStreamProducer {
         speciesPatterns = new HashMap<>();
         
         try (CSVReader reader = new CSVReader(new FileReader(HISTORICAL_DATA_PATH))) {
-            String[] header = reader.readNext(); // Skip header
+            // String[] header = reader.readNext(); // Skip header
             String[] line;
             
             System.out.println("Loading historical patterns from: " + HISTORICAL_DATA_PATH);
@@ -92,7 +92,7 @@ public class DataStreamProducer {
             // Based on your CSV: year,season,breeding_code,observations,percentage_of_season,rank,source_file,period,analysis_period,decade,breeding_success_indicator,territorial_behavior
             int year = Integer.parseInt(line[0]);
             String season = line[1];
-            String breedingCode = line[2];
+            //String breedingCode = line[2];
             int observations = Integer.parseInt(line[3]);
             
             // Create a synthetic observation date based on season and year
@@ -148,7 +148,7 @@ public class DataStreamProducer {
         System.out.println("Starting historical data replay...");
         
         try (CSVReader reader = new CSVReader(new FileReader(HISTORICAL_DATA_PATH))) {
-            String[] header = reader.readNext();
+            //String[] header = reader.readNext();
             String[] line;
             
             while ((line = reader.readNext()) != null) {
