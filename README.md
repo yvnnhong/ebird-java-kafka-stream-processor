@@ -267,7 +267,3 @@ This project is a personal portfolio demonstration of data engineering and strea
 
 **Author**: Yvonne Hong  
 **Project Type**: Data Engineering & Stream Processing Portfolio
-
----
-
-*This project demonstrates production-ready data engineering skills including real-time stream processing, statistical analysis, machine learning integration, and scalable system design.*
