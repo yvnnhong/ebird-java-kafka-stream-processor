@@ -1,0 +1,28 @@
+{
+  "generation_date": "2025-06-28T13:57:43.372258",
+  "total_observations": 1000,
+  "anomalies": 32,
+  "seasons": {
+    "Summer": 277,
+    "Fall": 265,
+    "Spring": 237,
+    "Winter": 221
+  },
+  "breeding_codes": {
+    "S7": 297,
+    "ON": 218,
+    "C": 202,
+    "FL": 165,
+    "CN": 33,
+    "NY": 30,
+    "T": 16,
+    "N": 14,
+    "NB": 12,
+    "B": 7,
+    "A": 3,
+    "M": 2,
+    "NE": 1
+  },
+  "prediction_model": "polynomial_regression_degree_2",
+  "data_source": "San Diego County eBird 2005-2024"
+}

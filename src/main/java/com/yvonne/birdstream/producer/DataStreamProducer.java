@@ -1,4 +1,4 @@
-// DataStreamProducer.java - Fixed file paths and enhanced synthetic generation
+// DataStreamProducer.java - Integrated with regression-based synthetic data
 package com.yvonne.birdstream.producer;
 
 import com.opencsv.CSVReader;
@@ -8,8 +8,11 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.io.FileReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 //import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -23,11 +26,13 @@ public class DataStreamProducer {
     private static final String BOOTSTRAP_SERVERS = "localhost:9092";
     private static final ObjectMapper mapper = new ObjectMapper();
     
-    // Updated file path to your actual CSV
+    // File paths
     private static final String HISTORICAL_DATA_PATH = "data/results_csv/mourning_dove_baseline_complete.csv";
+    private static final String SYNTHETIC_DATA_PATH = "data/synthetic_observations_regression.json";
     
     private KafkaProducer<String, String> producer;
     private Map<String, SpeciesPattern> speciesPatterns;
+    private List<JsonNode> preGeneratedSyntheticData;
     
     public static void main(String[] args) {
         DataStreamProducer producer = new DataStreamProducer();
@@ -37,17 +42,30 @@ public class DataStreamProducer {
     public void start() {
         initializeKafkaProducer();
         loadHistoricalPatterns();
+        loadPreGeneratedSyntheticData();
+        
+        System.out.println("🚀 Starting dual-stream data pipeline...");
+        System.out.println("   📚 Historical data: " + (speciesPatterns.size() > 0 ? "Loaded" : "Not found"));
+        System.out.println("   🤖 Synthetic data: " + preGeneratedSyntheticData.size() + " observations");
         
         // Start both streams
         Thread historicalReplay = new Thread(this::replayHistoricalData);
-        Thread syntheticGenerator = new Thread(this::generateSyntheticData);
+        Thread syntheticStream = new Thread(this::streamPreGeneratedSynthetic);
         
         historicalReplay.start();
-        syntheticGenerator.start();
+        
+        // Wait for historical data to build patterns, then start synthetic
+        try {
+            Thread.sleep(10000); // 10 second delay
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        
+        syntheticStream.start();
         
         try {
             historicalReplay.join();
-            syntheticGenerator.join();
+            syntheticStream.join();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -60,19 +78,48 @@ public class DataStreamProducer {
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         
         this.producer = new KafkaProducer<>(props);
+        System.out.println("✅ Kafka producer initialized");
+    }
+    
+    private void loadPreGeneratedSyntheticData() {
+        preGeneratedSyntheticData = new ArrayList<>();
+        
+        try {
+            String jsonContent = Files.readString(Paths.get(SYNTHETIC_DATA_PATH));
+            JsonNode arrayNode = mapper.readTree(jsonContent);
+            
+            if (arrayNode.isArray()) {
+                for (JsonNode obsNode : arrayNode) {
+                    preGeneratedSyntheticData.add(obsNode);
+                }
+            }
+            
+            System.out.println("✅ Loaded " + preGeneratedSyntheticData.size() + " pre-generated synthetic observations");
+            
+            // Show sample data
+            if (!preGeneratedSyntheticData.isEmpty()) {
+                JsonNode sample = preGeneratedSyntheticData.get(0);
+                System.out.println("   📋 Sample: " + sample.get("commonName").asText() + 
+                                 ", count=" + sample.get("count").asInt() + 
+                                 ", season=" + sample.get("season").asText());
+            }
+            
+        } catch (Exception e) {
+            System.err.println("⚠️  Could not load pre-generated synthetic data: " + e.getMessage());
+            System.err.println("   Will generate synthetic data on-the-fly instead");
+        }
     }
     
     private void loadHistoricalPatterns() {
         speciesPatterns = new HashMap<>();
         
         try (CSVReader reader = new CSVReader(new FileReader(HISTORICAL_DATA_PATH))) {
-            // String[] header = reader.readNext(); // Skip header
+            String[] header = reader.readNext();
             String[] line;
             
-            System.out.println("Loading historical patterns from: " + HISTORICAL_DATA_PATH);
+            System.out.println("📊 Loading historical patterns from: " + HISTORICAL_DATA_PATH);
             
             while ((line = reader.readNext()) != null) {
-                // Parse your CSV format: year,season,breeding_code,observations,etc.
                 BirdObservation obs = parseMourningDoveObservation(line);
                 if (obs != null) {
                     updateSpeciesPattern(obs);
@@ -80,41 +127,35 @@ public class DataStreamProducer {
             }
             
         } catch (Exception e) {
-            System.err.println("Error loading historical patterns: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("⚠️  Error loading historical patterns: " + e.getMessage());
         }
         
-        System.out.println("Loaded patterns for " + speciesPatterns.size() + " species/location combinations");
+        System.out.println("✅ Loaded patterns for " + speciesPatterns.size() + " species/location combinations");
     }
     
     private BirdObservation parseMourningDoveObservation(String[] line) {
         try {
-            // Based on your CSV: year,season,breeding_code,observations,percentage_of_season,rank,source_file,period,analysis_period,decade,breeding_success_indicator,territorial_behavior
+            // CSV format: year,season,breeding_code,observations,percentage_of_season,rank,source_file,period,analysis_period,decade,breeding_success_indicator,territorial_behavior
             int year = Integer.parseInt(line[0]);
             String season = line[1];
-            //String breedingCode = line[2];
+            String breedingCode = line[2];
             int observations = Integer.parseInt(line[3]);
             
-            // Create a synthetic observation date based on season and year
             LocalDateTime observationDate = createSeasonalDate(year, season);
-            
-            // Use realistic California coordinates (you can expand this)
-            double[] coords = getRandomCaliforniaCoordinates();
-            String county = "California_County_" + ThreadLocalRandom.current().nextInt(20); // Simulate multiple counties
+            double[] coords = getRandomSanDiegoCoordinates();
+            String county = "San Diego";
             
             return new BirdObservation(
                 UUID.randomUUID().toString(),
-                "Mourning Dove", // Your target species
-                Math.max(1, observations), // Ensure positive count
+                "Mourning Dove",
+                Math.max(1, observations),
                 observationDate,
-                coords[0], // latitude
-                coords[1], // longitude
+                coords[0], coords[1],
                 county,
                 "Historical_Observer_" + year
             );
             
         } catch (Exception e) {
-            System.err.println("Error parsing line: " + Arrays.toString(line));
             return null;
         }
     }
@@ -122,21 +163,21 @@ public class DataStreamProducer {
     private LocalDateTime createSeasonalDate(int year, String season) {
         int month;
         switch (season.toLowerCase()) {
-            case "spring": month = 3 + ThreadLocalRandom.current().nextInt(3); break; // Mar-May
-            case "summer": month = 6 + ThreadLocalRandom.current().nextInt(3); break; // Jun-Aug
-            case "fall": month = 9 + ThreadLocalRandom.current().nextInt(3); break;   // Sep-Nov
-            case "winter": month = ThreadLocalRandom.current().nextBoolean() ? 12 : 1 + ThreadLocalRandom.current().nextInt(2); break; // Dec, Jan-Feb
+            case "spring": month = 3 + ThreadLocalRandom.current().nextInt(3); break;
+            case "summer": month = 6 + ThreadLocalRandom.current().nextInt(3); break;
+            case "fall": month = 9 + ThreadLocalRandom.current().nextInt(3); break;
+            case "winter": month = ThreadLocalRandom.current().nextBoolean() ? 12 : 1 + ThreadLocalRandom.current().nextInt(2); break;
             default: month = ThreadLocalRandom.current().nextInt(12) + 1;
         }
         
-        int day = ThreadLocalRandom.current().nextInt(28) + 1; // Safe day range
-        return LocalDateTime.of(year, month, day, 8 + ThreadLocalRandom.current().nextInt(10), 0); // 8 AM - 6 PM
+        int day = ThreadLocalRandom.current().nextInt(28) + 1;
+        return LocalDateTime.of(year, month, day, 8 + ThreadLocalRandom.current().nextInt(10), 0);
     }
     
-    private double[] getRandomCaliforniaCoordinates() {
-        // California bounding box (approximate)
-        double minLat = 32.5, maxLat = 42.0;
-        double minLon = -124.5, maxLon = -114.0;
+    private double[] getRandomSanDiegoCoordinates() {
+        // San Diego County bounds
+        double minLat = 32.53, maxLat = 33.51;
+        double minLon = -117.60, maxLon = -116.07;
         
         double lat = minLat + (maxLat - minLat) * ThreadLocalRandom.current().nextDouble();
         double lon = minLon + (maxLon - minLon) * ThreadLocalRandom.current().nextDouble();
@@ -145,20 +186,26 @@ public class DataStreamProducer {
     }
     
     private void replayHistoricalData() {
-        System.out.println("Starting historical data replay...");
+        System.out.println("📚 Starting historical data replay...");
         
         try (CSVReader reader = new CSVReader(new FileReader(HISTORICAL_DATA_PATH))) {
-            //String[] header = reader.readNext();
+            String[] header = reader.readNext();
             String[] line;
+            int count = 0;
             
             while ((line = reader.readNext()) != null) {
                 BirdObservation obs = parseMourningDoveObservation(line);
                 
                 if (obs != null) {
                     sendToKafka(obs, "HISTORICAL");
+                    count++;
                     
-                    // Simulate time delay (speed up time: 1 day = 100ms)
-                    Thread.sleep(100);
+                    if (count % 10 == 0) {
+                        System.out.println("   📤 Streamed " + count + " historical observations");
+                    }
+                    
+                    // Simulate time delay (accelerated: 1 day = 50ms)
+                    Thread.sleep(50);
                 }
             }
             
@@ -166,23 +213,84 @@ public class DataStreamProducer {
             e.printStackTrace();
         }
         
-        System.out.println("Historical replay completed");
+        System.out.println("✅ Historical replay completed");
     }
     
-    private void generateSyntheticData() {
-        System.out.println("Starting synthetic data generation...");
+    private void streamPreGeneratedSynthetic() {
+        System.out.println("🤖 Starting regression-based synthetic data stream...");
         
-        // Wait a bit for historical data to build patterns
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        if (preGeneratedSyntheticData.isEmpty()) {
+            System.out.println("⚠️  No pre-generated data found, falling back to real-time generation");
+            generateSyntheticDataRealTime();
             return;
         }
         
+        try {
+            int count = 0;
+            
+            for (JsonNode syntheticNode : preGeneratedSyntheticData) {
+                // Convert JSON node to BirdObservation
+                BirdObservation obs = jsonNodeToBirdObservation(syntheticNode);
+                
+                if (obs != null) {
+                    sendToKafka(obs, "SYNTHETIC");
+                    count++;
+                    
+                    // Log anomalies
+                    if (syntheticNode.has("isAnomaly") && syntheticNode.get("isAnomaly").asBoolean()) {
+                        System.out.println("🚨 Streaming ANOMALY: " + obs.getCount() + 
+                                         " birds in " + syntheticNode.get("season").asText() + 
+                                         " (ID: " + obs.getId() + ")");
+                    }
+                    
+                    if (count % 20 == 0) {
+                        System.out.println("   🔄 Streamed " + count + "/" + preGeneratedSyntheticData.size() + 
+                                         " synthetic observations");
+                    }
+                    
+                    // Stream at realistic intervals (every 3 seconds)
+                    Thread.sleep(3000);
+                }
+            }
+            
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        System.out.println("✅ Synthetic data streaming completed");
+    }
+    
+    private BirdObservation jsonNodeToBirdObservation(JsonNode node) {
+        try {
+            String id = node.get("id").asText();
+            String commonName = node.get("commonName").asText();
+            int count = node.get("count").asInt();
+            String dateStr = node.get("observationDate").asText();
+            LocalDateTime observationDate = LocalDateTime.parse(dateStr + "T08:00:00");
+            double latitude = node.get("latitude").asDouble();
+            double longitude = node.get("longitude").asDouble();
+            String county = node.get("county").asText();
+            String observerId = node.has("observerId") ? 
+                               node.get("observerId").asText() : 
+                               "REGRESSION_OBSERVER_" + ThreadLocalRandom.current().nextInt(100);
+            
+            return new BirdObservation(id, commonName, count, observationDate, 
+                                     latitude, longitude, county, observerId);
+            
+        } catch (Exception e) {
+            System.err.println("Error converting JSON to BirdObservation: " + e.getMessage());
+            return null;
+        }
+    }
+    
+    private void generateSyntheticDataRealTime() {
+        System.out.println("🔄 Generating synthetic data in real-time...");
+        
         while (true) {
             try {
-                // Generate observations for each species pattern
+                // Generate based on learned patterns
                 for (String speciesKey : speciesPatterns.keySet()) {
                     if (shouldGenerateObservation(speciesKey)) {
                         BirdObservation syntheticObs = generateSyntheticObservation(speciesKey);
@@ -190,7 +298,7 @@ public class DataStreamProducer {
                     }
                 }
                 
-                Thread.sleep(2000); // Generate every 2 seconds
+                Thread.sleep(5000); // Generate every 5 seconds
                 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -204,41 +312,38 @@ public class DataStreamProducer {
         LocalDateTime now = LocalDateTime.now();
         int currentMonth = now.getMonthValue();
         
-        // Higher probability during peak months for this species
         double probability = pattern.getMonthlyProbability(currentMonth);
-        return ThreadLocalRandom.current().nextDouble() < probability * 0.01; // Scale down for demo
+        return ThreadLocalRandom.current().nextDouble() < probability * 0.02; // Scale down
     }
     
     private BirdObservation generateSyntheticObservation(String speciesKey) {
         SpeciesPattern pattern = speciesPatterns.get(speciesKey);
         LocalDateTime now = LocalDateTime.now();
         
-        // Generate count with some variation (occasionally create anomalies)
+        // Generate count with variation
         int baseCount = Math.max(1, (int) pattern.getAverageCount());
         int count;
         
-        // 5% chance of creating an anomaly (very high count)
+        // 5% chance of creating an anomaly
         if (ThreadLocalRandom.current().nextDouble() < 0.05) {
-            count = baseCount * (5 + ThreadLocalRandom.current().nextInt(10)); // 5-15x normal
-            System.out.println("🎯 Generating ANOMALY: " + count + " (normal: " + baseCount + ")");
+            count = baseCount * (5 + ThreadLocalRandom.current().nextInt(10));
+            System.out.println("🎯 Generated real-time ANOMALY: " + count + " (normal: " + baseCount + ")");
         } else {
-            // Normal variation
             double stdDev = Math.max(1.0, pattern.getCountStdDev());
             count = Math.max(1, (int) (baseCount + ThreadLocalRandom.current().nextGaussian() * stdDev));
         }
         
-        // Pick a location from historical observations
         LocationData location = pattern.getRandomLocation();
         
         return new BirdObservation(
             UUID.randomUUID().toString(),
-            "Mourning Dove", // Your target species
+            "Mourning Dove",
             count,
             now,
             location.getLatitude(),
             location.getLongitude(),
             location.getCounty(),
-            "SYNTHETIC_OBSERVER_" + ThreadLocalRandom.current().nextInt(1000)
+            "REALTIME_SYNTHETIC_" + ThreadLocalRandom.current().nextInt(1000)
         );
     }
     
@@ -269,9 +374,12 @@ public class DataStreamProducer {
             
             producer.send(record);
             
+            // Only log synthetic data to avoid spam
             if ("SYNTHETIC".equals(dataType)) {
-                System.out.println("📤 Sent synthetic: " + obs.getCommonName() + 
-                                 " count=" + obs.getCount() + " in " + obs.getCounty());
+                System.out.println("📤 Sent: " + obs.getCommonName() + 
+                                 " count=" + obs.getCount() + 
+                                 " in " + obs.getCounty() + 
+                                 " (" + dataType + ")");
             }
             
         } catch (Exception e) {
