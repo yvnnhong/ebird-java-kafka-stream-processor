@@ -29,7 +29,7 @@ Temporal scope: 2025 predictions based on 2005-2024 historical data
 ## Detection Performance Analysis
 
 ### Confusion Matrix Results
-True Positives: 31 (correctly identified anomalies)
+True Positives: 31 (correctly identified 31/32 anomalies)
 False Positives: 0 (no incorrect anomaly flags)
 True Negatives: 968 (correctly identified normal observations)
 False Negatives: 1 (missed 1 true anomaly)
