@@ -387,7 +387,7 @@ public class DataStreamProducer {
             
             // Only log synthetic data to avoid spam
             if ("SYNTHETIC".equals(dataType)) {
-                System.out.println("📤 Sent: " + obs.getCommonName() + 
+                System.out.println("Sent: " + obs.getCommonName() + 
                                  " count=" + obs.getCount() + 
                                  " in " + obs.getCounty() + 
                                  " (" + dataType + ")");
