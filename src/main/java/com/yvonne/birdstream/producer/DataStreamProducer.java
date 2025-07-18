@@ -44,9 +44,9 @@ public class DataStreamProducer {
         loadHistoricalPatterns();
         loadPreGeneratedSyntheticData();
         
-        System.out.println("🚀 Starting dual-stream data pipeline...");
-        System.out.println("   📚 Historical data: " + (speciesPatterns.size() > 0 ? "Loaded" : "Not found"));
-        System.out.println("   🤖 Synthetic data: " + preGeneratedSyntheticData.size() + " observations");
+        System.out.println("Starting dual-stream data pipeline...");
+        System.out.println("Historical data: " + (speciesPatterns.size() > 0 ? "Loaded" : "Not found"));
+        System.out.println("Synthetic data: " + preGeneratedSyntheticData.size() + " observations");
         
         // Start both streams
         Thread historicalReplay = new Thread(this::replayHistoricalData);
@@ -78,7 +78,7 @@ public class DataStreamProducer {
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         
         this.producer = new KafkaProducer<>(props);
-        System.out.println("✅ Kafka producer initialized");
+        System.out.println("Kafka producer initialized");
     }
     
     private void loadPreGeneratedSyntheticData() {
@@ -94,18 +94,18 @@ public class DataStreamProducer {
                 }
             }
             
-            System.out.println("✅ Loaded " + preGeneratedSyntheticData.size() + " pre-generated synthetic observations");
+            System.out.println("Loaded " + preGeneratedSyntheticData.size() + " pre-generated synthetic observations");
             
             // Show sample data
             if (!preGeneratedSyntheticData.isEmpty()) {
                 JsonNode sample = preGeneratedSyntheticData.get(0);
-                System.out.println("   📋 Sample: " + sample.get("commonName").asText() + 
+                System.out.println("Sample: " + sample.get("commonName").asText() + 
                                  ", count=" + sample.get("count").asInt() + 
                                  ", season=" + sample.get("season").asText());
             }
             
         } catch (Exception e) {
-            System.err.println("⚠️  Could not load pre-generated synthetic data: " + e.getMessage());
+            System.err.println("Could not load pre-generated synthetic data: " + e.getMessage());
             System.err.println("   Will generate synthetic data on-the-fly instead");
         }
     }
@@ -117,7 +117,7 @@ public class DataStreamProducer {
             String[] header = reader.readNext();
             String[] line;
             
-            System.out.println("📊 Loading historical patterns from: " + HISTORICAL_DATA_PATH);
+            System.out.println("Loading historical patterns from: " + HISTORICAL_DATA_PATH);
             
             while ((line = reader.readNext()) != null) {
                 BirdObservation obs = parseMourningDoveObservation(line);
@@ -127,10 +127,10 @@ public class DataStreamProducer {
             }
             
         } catch (Exception e) {
-            System.err.println("⚠️  Error loading historical patterns: " + e.getMessage());
+            System.err.println("Error loading historical patterns: " + e.getMessage());
         }
         
-        System.out.println("✅ Loaded patterns for " + speciesPatterns.size() + " species/location combinations");
+        System.out.println("Loaded patterns for " + speciesPatterns.size() + " species/location combinations");
     }
     
     private BirdObservation parseMourningDoveObservation(String[] line) {
@@ -186,7 +186,7 @@ public class DataStreamProducer {
     }
     
     private void replayHistoricalData() {
-        System.out.println("📚 Starting historical data replay...");
+        System.out.println("Starting historical data replay...");
         
         try (CSVReader reader = new CSVReader(new FileReader(HISTORICAL_DATA_PATH))) {
             String[] header = reader.readNext();
@@ -201,7 +201,7 @@ public class DataStreamProducer {
                     count++;
                     
                     if (count % 10 == 0) {
-                        System.out.println("   📤 Streamed " + count + " historical observations");
+                        System.out.println("Streamed " + count + " historical observations");
                     }
                     
                     // Simulate time delay (accelerated: 1 day = 50ms)
@@ -213,14 +213,14 @@ public class DataStreamProducer {
             e.printStackTrace();
         }
         
-        System.out.println("✅ Historical replay completed");
+        System.out.println("Historical replay completed");
     }
     
     private void streamPreGeneratedSynthetic() {
-        System.out.println("🤖 Starting regression-based synthetic data stream...");
+        System.out.println("Starting regression-based synthetic data stream...");
         
         if (preGeneratedSyntheticData.isEmpty()) {
-            System.out.println("⚠️  No pre-generated data found, falling back to real-time generation");
+            System.out.println("No pre-generated data found, falling back to real-time generation");
             generateSyntheticDataRealTime();
             return;
         }
@@ -238,13 +238,13 @@ public class DataStreamProducer {
                     
                     // Log anomalies
                     if (syntheticNode.has("isAnomaly") && syntheticNode.get("isAnomaly").asBoolean()) {
-                        System.out.println("🚨 Streaming ANOMALY: " + obs.getCount() + 
+                        System.out.println("Streaming ANOMALY: " + obs.getCount() + 
                                          " birds in " + syntheticNode.get("season").asText() + 
                                          " (ID: " + obs.getId() + ")");
                     }
                     
                     if (count % 20 == 0) {
-                        System.out.println("   🔄 Streamed " + count + "/" + preGeneratedSyntheticData.size() + 
+                        System.out.println("Streamed " + count + "/" + preGeneratedSyntheticData.size() + 
                                          " synthetic observations");
                     }
                     
@@ -259,7 +259,7 @@ public class DataStreamProducer {
             e.printStackTrace();
         }
         
-        System.out.println("✅ Synthetic data streaming completed");
+        System.out.println("Synthetic data streaming completed");
     }
     
     private BirdObservation jsonNodeToBirdObservation(JsonNode node) {
@@ -297,7 +297,7 @@ public class DataStreamProducer {
     }
     
     private void generateSyntheticDataRealTime() {
-        System.out.println("🔄 Generating synthetic data in real-time...");
+        System.out.println("Generating synthetic data in real-time...");
         
         while (true) {
             try {
@@ -338,7 +338,7 @@ public class DataStreamProducer {
         // 5% chance of creating an anomaly
         if (ThreadLocalRandom.current().nextDouble() < 0.05) {
             count = baseCount * (5 + ThreadLocalRandom.current().nextInt(10));
-            System.out.println("🎯 Generated real-time ANOMALY: " + count + " (normal: " + baseCount + ")");
+            System.out.println("Generated real-time ANOMALY: " + count + " (normal: " + baseCount + ")");
         } else {
             double stdDev = Math.max(1.0, pattern.getCountStdDev());
             count = Math.max(1, (int) (baseCount + ThreadLocalRandom.current().nextGaussian() * stdDev));
